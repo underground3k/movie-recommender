@@ -14,9 +14,10 @@ import java.util.Comparator;
 public class MovieService {
 
     private final MovieRepository movieRepository;
-
-    public MovieService(MovieRepository movieRepository) {
+    private final TmdbService tmdbService;
+    public MovieService(MovieRepository movieRepository, TmdbService tmdbService) {
         this.movieRepository = movieRepository;
+        this.tmdbService = tmdbService;
     }
 
     public Page<MovieSummaryDto> getMovies(Pageable pageable) {
@@ -24,10 +25,8 @@ public class MovieService {
                 .map(m -> new MovieSummaryDto(
                         m.getId(),
                         m.getTitle(),
-                        m.getGenres().stream()
-                                .map(Genre::getName)
-                                .sorted()
-                                .toList()
+                        m.getGenres().stream().map(Genre::getName).sorted().toList(),
+                        tmdbService.getPosterUrl(m.getTitle())
                 ));
     }
 

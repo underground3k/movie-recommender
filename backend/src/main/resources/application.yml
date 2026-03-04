@@ -13,3 +13,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+
+tmdb:
+  api-key: 9594807b52677b8ac0d880e4783484aa
+  image-url: https://image.tmdb.org/t/p/w500
