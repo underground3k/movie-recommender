@@ -1,4 +1,9 @@
 package com.profai.backend.movie.dto;
 
-public class MovieDetailDto {
-}
+import java.util.List;
+
+public record MovieDetailDto(
+        Long id,
+        String title,
+        List<String> genres
+) {}
