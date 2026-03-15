@@ -25,6 +25,19 @@ function HomePage() {
         <h1 style={{ margin: 0 }}>🎬 Movie Recommender</h1>
         <div style={{ display: "flex", gap: "8px" }}>
           <button
+            onClick={() => navigate("/my-ratings")}
+            style={{
+              padding: "6px 10px",
+              borderRadius: "999px",
+              border: "1px solid #d1d5db",
+              background: "#f9fafb",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            My ratings
+          </button>
+          <button
             onClick={() => navigate("/login")}
             style={{
               padding: "6px 12px",
