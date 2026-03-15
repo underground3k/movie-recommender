@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getMovieById, getPosterUrl } from "../api/tmdb";
+import { getMovieById} from "../api/movies"; // changed import
 
 function MovieDetailPage() {
   const { id } = useParams();
@@ -20,17 +20,13 @@ function MovieDetailPage() {
       </button>
 
       <div style={{ display: "flex", gap: "24px" }}>
-        <img
-          src={getPosterUrl(movie.poster_path)}
-          alt={movie.title}
-          style={{ width: "200px", borderRadius: "8px" }}
-        />
+        <img src={movie.posterUrl} alt={movie.title} />
 
         <div>
           <h1>{movie.title}</h1>
           <p><strong>Release date:</strong> {movie.release_date}</p>
           <p><strong>Rating:</strong> ⭐ {movie.vote_average?.toFixed(1)} / 10</p>
-          <p><strong>Genres:</strong> {movie.genres?.map((g) => g.name).join(", ")}</p>
+          <p><strong>Genres:</strong> {movie.genres?.join(", ")}</p>
           <p style={{ marginTop: "16px" }}>{movie.overview}</p>
         </div>
       </div>
