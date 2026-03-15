@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getMovieById, getPosterUrl } from "../api/tmdb";
+import { getMovieById } from "../api/movies";
 import StarRating from "./components/StarRating";
 
 function MovieDetailPage() {
@@ -22,11 +22,7 @@ function MovieDetailPage() {
       </button>
 
       <div style={{ display: "flex", gap: "24px" }}>
-        <img
-          src={getPosterUrl(movie.poster_path)}
-          alt={movie.title}
-          style={{ width: "200px", borderRadius: "8px" }}
-        />
+        <img src={movie.posterUrl} alt={movie.title} />
 
         <div>
           <h1>{movie.title}</h1>
@@ -37,8 +33,7 @@ function MovieDetailPage() {
             <strong>Rating:</strong> ⭐ {movie.vote_average?.toFixed(1)} / 10
           </p>
           <p>
-            <strong>Genres:</strong>{" "}
-            {movie.genres?.map((g) => g.name).join(", ")}
+            <strong>Genres:</strong> {movie.genres?.join(", ")}
           </p>
 
           <div style={{ marginTop: "16px" }}>
