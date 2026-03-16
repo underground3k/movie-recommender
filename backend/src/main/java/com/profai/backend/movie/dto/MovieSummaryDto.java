@@ -5,5 +5,6 @@ import java.util.List;
 public record MovieSummaryDto(
         Long id,
         String title,
-        List<String> genres
+        List<String> genres,
+        String posterUrl
 ) {}
