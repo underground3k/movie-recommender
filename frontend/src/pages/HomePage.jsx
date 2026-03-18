@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { getMovies } from "../api/movies";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+function HomePage() {
+  const [movies, setMovies] = useState([]);
 import { useNavigate } from "react-router-dom";
 
 function HomePage() {
@@ -70,6 +74,40 @@ function HomePage() {
               cursor: "pointer",
               fontSize: "14px",
             }}
+          >
+            My ratings
+          </button>
+          <button
+            onClick={() => navigate("/login")}
+            style={{
+              padding: "6px 12px",
+              borderRadius: "999px",
+              border: "1px solid #d1d5db",
+              background: "#fff",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Log in
+          </button>
+          <button
+            onClick={() => navigate("/register")}
+            style={{
+              padding: "6px 14px",
+              borderRadius: "999px",
+              border: "none",
+              background:
+                "linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #ec4899 100%)",
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "600",
+              boxShadow: "0 4px 14px rgba(79,70,229,0.35)",
+            }}
+          >
+            Sign up
+          </button>
+        </div>
           >
             My ratings
           </button>
@@ -185,6 +223,14 @@ function HomePage() {
           </div>
         ))}
       </div>
+      {/* Antras h1 iš senos versijos atrodė kaip dublis, paliekam tik header viršuje */}
+      {loading && <p>Loading movies...</p>}
+      {error && (
+        <p style={{ color: "red", marginBottom: "12px" }}>
+          {error}
+        </p>
+      )}
+
       {/* Antras h1 iš senos versijos atrodė kaip dublis, paliekam tik header viršuje */}
       {loading && <p>Loading movies...</p>}
       {error && (
