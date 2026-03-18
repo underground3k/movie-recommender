@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import { getMovies } from "../api/movies";
+import { useNavigate } from "react-router-dom";
+
+function HomePage() {
+  const [movies, setMovies] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [page, setPage] = useState(0); // backend uses 0-based pages
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function HomePage() {
@@ -31,6 +37,13 @@ function HomePage() {
   }, [page]);
 
   useEffect(() => {
+    // MVP: kol nėra tikro /recommendations endpoint,
+    // naudojame pirmo puslapio filmus kaip "Recommended for you"
+    getMovies(0).then((data) => {
+      const items = data.content || [];
+      setRecommended(items.slice(0, 8));
+    });
+  }, []);
     setSearchParams({ page: String(page) });
   }, [page, setSearchParams]);
 
@@ -93,6 +106,85 @@ function HomePage() {
         </div>
       </div>
 
+      {recommended.length > 0 && (
+        <div style={{ marginBottom: "24px" }}>
+          <h2 style={{ fontSize: "18px", marginBottom: "12px" }}>
+            Recommended for you
+          </h2>
+          <div style={{ display: "flex", overflowX: "auto", gap: "12px", paddingBottom: "4px" }}>
+            {recommended.map((movie) => (
+              <div
+                key={movie.id}
+                onClick={() => navigate(`/movies/${movie.id}`)}
+                style={{
+                  minWidth: "140px",
+                  maxWidth: "160px",
+                  cursor: "pointer",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: "#111827",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                }}
+              >
+                {movie.posterUrl ? (
+                  <img
+                    src={movie.posterUrl}
+                    alt={movie.title}
+                    style={{ width: "100%", display: "block" }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "200px",
+                      background:
+                        "radial-gradient(circle at top, #4f46e5, #111827 60%)",
+                    }}
+                  />
+                )}
+                <div style={{ padding: "8px" }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      color: "#e5e7eb",
+                    }}
+                  >
+                    {movie.title}
+                  </p>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: "11px",
+                      color: "#9ca3af",
+                    }}
+                  >
+                    ⭐ {movie.voteAverage?.toFixed?.(1) ?? "–"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <h1>🎬 All movies</h1>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+        {movies.map((movie) => (
+          <div
+            key={movie.id}
+            onClick={() => navigate(`/movies/${movie.id}`)}
+            style={{ width: "150px", cursor: "pointer" }}
+          >
+            {movie.posterUrl
+              ? <img src={movie.posterUrl} alt={movie.title} style={{ width: "100%" }} />
+              : <div style={{ width: "150px", height: "225px", background: "#333" }} />
+            }
+            <p style={{ fontSize: "12px", fontWeight: "bold" }}>{movie.title}</p>
+          </div>
+        ))}
+      </div>
       {/* Antras h1 iš senos versijos atrodė kaip dublis, paliekam tik header viršuje */}
       {loading && <p>Loading movies...</p>}
       {error && (
