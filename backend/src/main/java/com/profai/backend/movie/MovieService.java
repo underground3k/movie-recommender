@@ -30,6 +30,16 @@ public class MovieService {
                 ));
     }
 
+    public Page<MovieSummaryDto> searchMovies(String query, Pageable pageable) {
+        return movieRepository.findByTitleContainingIgnoreCase(query, pageable)
+                .map(m -> new MovieSummaryDto(
+                        m.getId(),
+                        m.getTitle(),
+                        m.getGenres().stream().map(Genre::getName).sorted().toList(),
+                        tmdbService.getPosterUrl(m.getTitle())
+                ));
+    }
+
     public MovieDetailDto getMovieById(Long id) {
         Movie m = movieRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie not found"));

@@ -23,6 +23,13 @@ public class MovieController {
     public Page<MovieSummaryDto> getMovies(@PageableDefault(size = 20) Pageable pageable) {
         return movieService.getMovies(pageable);
     }
+    // Search
+    @GetMapping("/search")
+    public Page<MovieSummaryDto> searchMovies(
+            @RequestParam String query,
+            @PageableDefault(size = 40) Pageable pageable) {
+        return movieService.searchMovies(query, pageable);
+    }
 
     // GET /movies/{id}
     @GetMapping("/{id}")

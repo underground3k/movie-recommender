@@ -6,6 +6,8 @@ function HomePage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const initialPage = Number(searchParams.get("page")) || 1; // 1-based for URL
   const [page, setPage] = useState(initialPage);
@@ -28,11 +30,44 @@ function HomePage() {
     };
 
     load();
-  }, [page]);
+  }, [page, isSearching]);
 
   useEffect(() => {
-    setSearchParams({ page: String(page) });
-  }, [page, setSearchParams]);
+    if(!isSearching){
+      setSearchParams({ page: String(page) });
+    }
+  }, [page, isSearching,setSearchParams]);
+  const handleSearch = async () => {
+    const query = searchQuery.trim();
+    if(!query) {
+      handleClearSearch();
+      return;
+    }
+    setIsSearching(true);
+    setLoading(true);
+    setError("");
+    try{
+      const res = await fetch(`${API_URL}/movies/search?query=${encodeURIComponent(query)}&size=40`);
+      if(!res.ok) throw new Error("Server error: ${res.status}");
+      const data = await res.json();
+      setMovies(data.content || []);
+    } catch (e) {
+      console.error(e);
+      setError("Paieška nepavyko. Patikrink ar backend veikia ir VITE_API_URL.");
+      setMovies([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setIsSearching(false);
+    setPage(1);
+  };
+  const handleKeyDown = (e) => {
+    if(e.key === "Enter") handleSearch();
+    if(e.key === "Escape") handleClearSearch();
+  }
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
@@ -92,6 +127,69 @@ function HomePage() {
           </button>
         </div>
       </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "8px",
+          marginBottom: "24px",
+          maxWidth: "408px",
+        }}
+        >
+          <input
+            type="text"
+            placeholder="Search for a movie..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            style={{
+              flex: 1,
+              padding: "10px 14px",
+              borderRadius: "8px",
+              border: "1px solid #d1d5db",
+              fontSize: "14px",
+              outline: "none",
+            }}
+          />
+          <button
+            onClick={handleSearch}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "8px",
+              border: "none",
+              background: "#4f46e5",
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            Search
+            </button>
+            {isSearching && (
+              <button
+                onClick={handleClearSearch}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  border: "1px solid #d1d5db",
+                  background: "#fff",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  color: "#6b7280",
+                }}
+                >
+                  Clear
+                </button>
+            )}
+        </div>
+        {/*Search result label */}
+        {isSearching && !loading && (
+          <p style={{fontSize: "13px", color: "#6b7280", marginBottom: "12px"}}>
+            {movies.length > 0
+              ? `Found ${movies.length} result${movies.length !== 1 ? "s" : ""} for "${searchQuery}"`
+              : `No results found for "${searchQuery}"`}
+          </p>
+        )}
 
       {/* Antras h1 iš senos versijos atrodė kaip dublis, paliekam tik header viršuje */}
       {loading && <p>Loading movies...</p>}
