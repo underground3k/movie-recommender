@@ -1,26 +1,101 @@
 import { useEffect, useState } from "react";
-import { getMovies } from "../api/movies";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getMovies } from "../api/movies";
+
+function buildRetryUrl(url) {
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}retry=1`;
+}
+
+function MoviePoster({ posterUrl, title }) {
+  const [imageUrl, setImageUrl] = useState(posterUrl);
+  const [retried, setRetried] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(!posterUrl);
+
+  useEffect(() => {
+    if (!posterUrl || loaded || failed || retried) {
+      return undefined;
+    }
+
+    const retryTimer = setTimeout(() => {
+      setRetried(true);
+      setImageUrl(buildRetryUrl(posterUrl));
+    }, 4000);
+
+    return () => clearTimeout(retryTimer);
+  }, [posterUrl, loaded, failed, retried]);
+
+  if (!posterUrl || failed) {
+    return (
+      <div
+        style={{
+          width: "150px",
+          height: "225px",
+          background: "#333",
+          borderRadius: "8px",
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      style={{
+        width: "150px",
+        height: "225px",
+        borderRadius: "8px",
+        background: "#d1d5db",
+        overflow: "hidden",
+      }}
+    >
+      <img
+        src={imageUrl}
+        alt={title}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => {
+          if (!retried) {
+            setRetried(true);
+            setImageUrl(buildRetryUrl(posterUrl));
+            return;
+          }
+
+          setFailed(true);
+        }}
+        style={{
+          width: "150px",
+          height: "225px",
+          objectFit: "cover",
+          display: "block",
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.2s ease",
+        }}
+      />
+    </div>
+  );
+}
 
 function HomePage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [searchParams, setSearchParams] = useSearchParams();
-  const initialPage = Number(searchParams.get("page")) || 1; // 1-based for URL
-  const [page, setPage] = useState(initialPage);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawPage = Number.parseInt(searchParams.get("page") || "0", 10);
+  const page = Number.isNaN(rawPage) || rawPage < 0 ? 0 : rawPage;
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError("");
+
       try {
-        const data = await getMovies(page - 1); // backend expects 0-based
+        const data = await getMovies(page);
         setMovies(data.content || []);
-      } catch (e) {
-        console.error(e);
-        setError("Nepavyko užkrauti filmų. Patikrink ar backend veikia ir VITE_API_URL.");
+      } catch (loadError) {
+        console.error(loadError);
+        setError("Failed to load movies. Check if backend is running.");
         setMovies([]);
       } finally {
         setLoading(false);
@@ -42,24 +117,10 @@ function HomePage() {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "16px",
-          gap: "16px",
         }}
       >
-        <h1 style={{ margin: 0 }}>🎬 Movie Recommender</h1>
+        <h1 style={{ margin: 0 }}>Movie Recommender</h1>
         <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => navigate("/my-ratings")}
-            style={{
-              padding: "6px 10px",
-              borderRadius: "999px",
-              border: "1px solid #d1d5db",
-              background: "#f9fafb",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            My ratings
-          </button>
           <button
             onClick={() => navigate("/login")}
             style={{
@@ -68,7 +129,6 @@ function HomePage() {
               border: "1px solid #d1d5db",
               background: "#fff",
               cursor: "pointer",
-              fontSize: "14px",
             }}
           >
             Log in
@@ -83,15 +143,41 @@ function HomePage() {
                 "linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #ec4899 100%)",
               color: "#fff",
               cursor: "pointer",
-              fontSize: "14px",
               fontWeight: "600",
-              boxShadow: "0 4px 14px rgba(79,70,229,0.35)",
             }}
           >
             Sign up
           </button>
         </div>
       </div>
+
+      {loading && <p>Loading movies...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {!loading && !error && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+          {movies.map((movie) => (
+            <div
+              key={movie.id}
+              onClick={() =>
+                navigate(`/movies/${movie.id}`, {
+                  state: { from: `/?page=${page}` },
+                })
+              }
+              style={{ width: "150px", cursor: "pointer" }}
+            >
+              <MoviePoster
+                key={`${movie.id}-${movie.posterUrl || "missing"}`}
+                posterUrl={movie.posterUrl}
+                title={movie.title}
+              />
+              <p style={{ fontSize: "12px", fontWeight: "bold" }}>
+                {movie.title}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Antras h1 iš senos versijos atrodė kaip dublis, paliekam tik header viršuje */}
       {loading && <p>Loading movies...</p>}
@@ -132,13 +218,17 @@ function HomePage() {
       )}
       <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
         <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
+          onClick={() =>
+            setSearchParams({ page: String(Math.max(0, page - 1)) })
+          }
+          disabled={page === 0}
         >
-          ← Prev
+          Prev
         </button>
-        <span>Page {page}</span>
-        <button onClick={() => setPage((p) => p + 1)}>Next →</button>
+        <span>Page {page + 1}</span>
+        <button onClick={() => setSearchParams({ page: String(page + 1) })}>
+          Next
+        </button>
       </div>
     </div>
   );
