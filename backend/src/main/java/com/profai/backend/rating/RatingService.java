@@ -4,11 +4,14 @@ import com.profai.backend.movie.Movie;
 import com.profai.backend.movie.MovieRepository;
 import com.profai.backend.rating.dto.RateMovieRequest;
 import com.profai.backend.rating.dto.RatingResponse;
+import com.profai.backend.rating.dto.UserRatingDto;
 import com.profai.backend.user.User;
 import com.profai.backend.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class RatingService {
@@ -52,5 +55,20 @@ public class RatingService {
                 saved.getMovie().getTitle(),
                 saved.getStars()
         );
+    }
+
+    public List<UserRatingDto> getRatingsByUserId(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return ratingRepository.findByUserId(user.getId()).stream()
+                .map(rating -> new UserRatingDto(
+                        rating.getId(),
+                        rating.getMovie().getId(),
+                        rating.getMovie().getTitle(),
+                        rating.getStars()
+                ))
+                .toList();
     }
 }
