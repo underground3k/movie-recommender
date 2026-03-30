@@ -179,43 +179,6 @@ function HomePage() {
         </div>
       )}
 
-      {/* Antras h1 iš senos versijos atrodė kaip dublis, paliekam tik header viršuje */}
-      {loading && <p>Loading movies...</p>}
-      {error && (
-        <p style={{ color: "red", marginBottom: "12px" }}>
-          {error}
-        </p>
-      )}
-
-      {!loading && !error && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          {movies.map((movie) => (
-            <div
-              key={movie.id}
-              onClick={() => navigate(`/movies/${movie.id}`)}
-              style={{ width: "150px", cursor: "pointer" }}
-            >
-              {movie.posterUrl ? (
-                <img
-                  src={movie.posterUrl}
-                  alt={movie.title}
-                  style={{ width: "100%" }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "150px",
-                    height: "225px",
-                    background: "#333",
-                    borderRadius: "8px",
-                  }}
-                />
-              )}
-              <p style={{ fontSize: "12px", fontWeight: "bold" }}>{movie.title}</p>
-            </div>
-          ))}
-        </div>
-      )}
       <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
         <button
           onClick={() =>
