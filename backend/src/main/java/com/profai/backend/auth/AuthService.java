@@ -1,5 +1,7 @@
 package com.profai.backend.auth;
 
+import com.profai.backend.auth.dto.LoginRequest;
+import com.profai.backend.auth.dto.LoginResponse;
 import com.profai.backend.auth.dto.RegisterRequest;
 import com.profai.backend.auth.dto.RegisterResponse;
 import com.profai.backend.user.User;
@@ -13,9 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     public RegisterResponse register(RegisterRequest request) {
@@ -55,5 +59,29 @@ public class AuthService {
                 saved.getUsername(),
                 saved.getEmail()
         );
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        if (request.email() == null || request.email().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+        }
+
+        if (request.password() == null || request.password().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required");
+        }
+
+        User user = userRepository.findByEmailIgnoreCase(request.email())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+        boolean passwordMatches = BCrypt.checkpw(request.password(), user.getPassword());
+
+        if (!passwordMatches) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+
+        String token = jwtService.generateToken(user.getEmail(), user.getId());
+
+        return new LoginResponse(token);
     }
 }
