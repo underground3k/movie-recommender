@@ -14,6 +14,17 @@ public class Movie {
     @Column(nullable = false, length = 255)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
+    private String overview;
+
+    @Column
+    private String posterUrl;
+
+    @Column
+    private String releaseDate;
+
+    @Column
+    private Double voteAverage;
     @ManyToMany
     @JoinTable(
             name = "movie_genres",
@@ -32,4 +43,14 @@ public class Movie {
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public Set<Genre> getGenres() { return genres; }
+    public String getOverview() { return overview; }
+    public String getPosterUrl() { return posterUrl; }
+    public String getReleaseDate() { return releaseDate; }
+    public Double getVoteAverage() { return voteAverage; }
+
+    public void setOverview(String overview) { this.overview = overview; }
+    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
+    public void setReleaseDate(String releaseDate) { this.releaseDate = releaseDate; }
+    public void setVoteAverage(Double voteAverage) { this.voteAverage = voteAverage; }
+
 }
