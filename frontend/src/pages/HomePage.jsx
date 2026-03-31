@@ -124,11 +124,14 @@ function HomePage() {
           <button
             onClick={() => navigate("/login")}
             style={{
-              padding: "6px 12px",
+              padding: "6px 14px",
               borderRadius: "999px",
-              border: "1px solid #d1d5db",
-              background: "#fff",
+              border: "none",
+              background:
+                "linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #ec4899 100%)",
+              color: "#fff",
               cursor: "pointer",
+              fontWeight: "600",
             }}
           >
             Log in
