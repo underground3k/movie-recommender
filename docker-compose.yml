@@ -28,7 +28,7 @@ services:
       SPRING_DATASOURCE_USERNAME: movielib_user
       SPRING_DATASOURCE_PASSWORD: movielib_pass
       SERVER_PORT: 8080
-      TMDB_API_KEY: 9594807b52677b8ac0d880e4783484aa
+      TMDB_API_KEY: ${TMDB_API_KEY}
     ports:
       - "8080:8080"
 
