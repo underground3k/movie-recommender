@@ -16,21 +16,5 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    build:
-      context: ./backend
-    container_name: movielib_backend
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/movielib
-      SPRING_DATASOURCE_USERNAME: movielib_user
-      SPRING_DATASOURCE_PASSWORD: movielib_pass
-      SERVER_PORT: 8080
-      TMDB_API_KEY: ${TMDB_API_KEY}
-    ports:
-      - "8080:8080"
-
 volumes:
   postgres_data:
