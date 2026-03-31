@@ -35,6 +35,16 @@ public class TmdbService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final Map<String, TmdbMovieData> movieCache = new ConcurrentHashMap<>();
 
+    public void enrichMovie(Movie movie) {
+        TmdbMovieData data = getMovieData(movie.getTitle());
+        if (data == null || data.isEmpty()) return;
+
+        movie.setPosterUrl(data.posterUrl());
+        movie.setOverview(data.overview());
+        movie.setReleaseDate(data.releaseDate());
+        movie.setVoteAverage(data.voteAverage());
+    }
+
     public TmdbMovieData getMovieData(String title) {
         TmdbMovieData cachedMovieData = movieCache.get(title);
         if (cachedMovieData != null && !cachedMovieData.isEmpty()) {

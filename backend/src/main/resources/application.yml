@@ -17,3 +17,7 @@ spring:
 tmdb:
   api-key: ${TMDB_API_KEY}
   image-url: ${TMDB_IMAGE_URL:https://image.tmdb.org/t/p/w500}
+
+jwt:
+  secret: ${JWT_SECRET:my-super-secret-key-my-super-secret-key}
+  expiration-ms: 86400000
