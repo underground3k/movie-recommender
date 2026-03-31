@@ -15,5 +15,5 @@ spring:
     show-sql: false
 
 tmdb:
-  api-key: ${TMDB_API_KEY:9594807b52677b8ac0d880e4783484aa}
+  api-key: ${TMDB_API_KEY}
   image-url: ${TMDB_IMAGE_URL:https://image.tmdb.org/t/p/w500}
