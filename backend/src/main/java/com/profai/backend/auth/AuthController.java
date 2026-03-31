@@ -1,5 +1,7 @@
 package com.profai.backend.auth;
 
+import com.profai.backend.auth.dto.LoginRequest;
+import com.profai.backend.auth.dto.LoginResponse;
 import com.profai.backend.auth.dto.RegisterRequest;
 import com.profai.backend.auth.dto.RegisterResponse;
 import org.springframework.web.bind.annotation.*;
@@ -18,5 +20,10 @@ public class AuthController {
     @PostMapping("/register")
     public RegisterResponse register(@RequestBody RegisterRequest request) {
         return authService.register(request);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
