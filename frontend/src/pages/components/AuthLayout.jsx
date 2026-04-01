@@ -2,137 +2,119 @@ import { Link } from "react-router-dom";
 
 function AuthLayout({ title, subtitle, children }) {
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background:
-          "radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%)",
-        color: "#e5e7eb",
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-        padding: "16px",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          background:
-            "linear-gradient(145deg, rgba(15,23,42,0.95), rgba(15,23,42,0.9))",
-          borderRadius: "24px",
-          padding: "28px 24px 24px",
-          boxShadow:
-            "0 24px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(148,163,184,0.08)",
-          border: "1px solid rgba(148,163,184,0.35)",
-          backdropFilter: "blur(18px)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "18px",
-            gap: "16px",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "4px 10px",
-                borderRadius: "999px",
-                background:
-                  "linear-gradient(135deg, rgba(251,191,36,0.2), rgba(248,113,113,0.18))",
-                border: "1px solid rgba(251,191,36,0.45)",
-                fontSize: "11px",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              <span>🎬</span>
-              <span>Movie Recommender</span>
-            </div>
-            <h1
-              style={{
-                margin: "10px 0 4px",
-                fontSize: "22px",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              {title}
-            </h1>
-            {subtitle && (
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "13px",
-                  color: "#9ca3af",
-                  maxWidth: "280px",
-                }}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "50%",
-              background:
-                "conic-gradient(from 210deg, #f97316, #ec4899, #6366f1, #22d3ee, #f97316)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 0 40px rgba(236,72,153,0.4)",
-            }}
-          >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                background: "#020617",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#e5e7eb",
-                fontSize: "20px",
-              }}
-            >
-              🎥
-            </div>
-          </div>
-        </div>
+    <div style={styles.page}>
+      {/* Subtle background gradient blobs */}
+      <div style={styles.blob1} />
+      <div style={styles.blob2} />
 
-        {children}
-
-        <div
-          style={{
-            marginTop: "18px",
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: "11px",
-            color: "#6b7280",
-          }}
-        >
-          <span>Prototype UI for Sprint 2</span>
-          <Link
-            to="/"
-            style={{ color: "#a5b4fc", textDecoration: "none", fontWeight: 500 }}
-          >
-            Back to movies
+      <div style={styles.card}>
+        {/* Top bar */}
+        <div style={styles.topBar}>
+          <Link to="/" style={styles.logo}>
+            <span style={styles.logoIcon}>◈</span>
+            <span style={styles.logoText}>Movie recommender</span>
           </Link>
+          <Link to="/" style={styles.backLink}>← Back</Link>
         </div>
+
+        {/* Header */}
+        <div style={styles.header}>
+          <h1 style={styles.title}>{title}</h1>
+          {subtitle && <p style={styles.subtitle}>{subtitle}</p>}
+        </div>
+
+        {/* Form slot */}
+        <div>{children}</div>
       </div>
     </div>
   );
 }
 
-export default AuthLayout;
+const styles = {
+  page: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "var(--bg)",
+    padding: "24px",
+    position: "relative",
+    overflow: "hidden",
+  },
+  blob1: {
+    position: "fixed",
+    width: "500px",
+    height: "500px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(232,200,74,0.06) 0%, transparent 70%)",
+    top: "-100px",
+    left: "-100px",
+    pointerEvents: "none",
+  },
+  blob2: {
+    position: "fixed",
+    width: "400px",
+    height: "400px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(100,100,200,0.05) 0%, transparent 70%)",
+    bottom: "-100px",
+    right: "-100px",
+    pointerEvents: "none",
+  },
+  card: {
+    position: "relative",
+    zIndex: 1,
+    width: "100%",
+    maxWidth: "400px",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius-lg)",
+    padding: "28px",
+    boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+  },
+  topBar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "28px",
+  },
+  logo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    textDecoration: "none",
+  },
+  logoIcon: {
+    fontSize: "16px",
+    color: "var(--accent)",
+  },
+  logoText: {
+    fontFamily: "'DM Serif Display', serif",
+    fontSize: "17px",
+    color: "var(--text-primary)",
+  },
+  backLink: {
+    fontSize: "12px",
+    color: "var(--text-muted)",
+    textDecoration: "none",
+    transition: "color 0.15s",
+  },
+  header: {
+    marginBottom: "24px",
+  },
+  title: {
+    fontFamily: "'DM Serif Display', serif",
+    fontSize: "26px",
+    fontWeight: 400,
+    color: "var(--text-primary)",
+    letterSpacing: "-0.01em",
+    marginBottom: "6px",
+  },
+  subtitle: {
+    fontSize: "14px",
+    color: "var(--text-secondary)",
+    lineHeight: 1.5,
+  },
+};
 
+export default AuthLayout;
