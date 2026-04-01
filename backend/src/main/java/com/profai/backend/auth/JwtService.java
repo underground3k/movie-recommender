@@ -1,5 +1,6 @@
 package com.profai.backend.auth;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,5 +33,35 @@ public class JwtService {
                 .expiration(expiry)
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    public Long extractUserId(String token) {
+        Claims claims = extractClaims(token);
+        Object userId = claims.get("userId");
+
+        if (userId instanceof Integer i) {
+            return i.longValue();
+        }
+        if (userId instanceof Long l) {
+            return l;
+        }
+        return Long.valueOf(userId.toString());
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            extractClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
