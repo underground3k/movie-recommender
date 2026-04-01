@@ -15,10 +15,14 @@ public class MovieLensImporter implements CommandLineRunner {
 
     private final MovieRepository movieRepository;
     private final GenreRepository genreRepository;
+    private final TmdbService tmdbService;
 
-    public MovieLensImporter(MovieRepository movieRepository, GenreRepository genreRepository) {
+
+    public MovieLensImporter(MovieRepository movieRepository, GenreRepository genreRepository, TmdbService tmdbService) {
         this.movieRepository = movieRepository;
         this.genreRepository = genreRepository;
+        this.tmdbService = tmdbService;
+
     }
 
     @Override
@@ -58,9 +62,15 @@ public class MovieLensImporter implements CommandLineRunner {
                             .orElseGet(() -> genreRepository.save(new Genre(genreName)));
                     movie.getGenres().add(genre);
                 }
-
+                tmdbService.enrichMovie(movie);
                 movieRepository.save(movie);
                 imported++;
+
+                if (imported % 100 == 0) {
+                    System.out.println("Imported: " + imported);
+                }
+
+                Thread.sleep(250);
             }
 
             System.out.println("✅ MovieLens import complete. Movies imported: " + imported);

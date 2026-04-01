@@ -57,11 +57,14 @@ function MovieDetailPage() {
         }}
         style={{
           marginBottom: "16px",
-          padding: "10px 16px",
+          padding: "6px 14px",
+          borderRadius: "999px",
           border: "none",
-          borderRadius: "10px",
-          background: "#f3f4f6",
+          background:
+            "linear-gradient(135deg, #4f46e5 0%, #7c3aed 45%, #ec4899 100%)",
+          color: "#fff",
           cursor: "pointer",
+          fontWeight: "600",
         }}
       >
         Back
@@ -101,7 +104,8 @@ function MovieDetailPage() {
         <div style={{ flex: "1 1 320px" }}>
           <h1>{movie.title}</h1>
           <p>
-            <strong>Release date:</strong> {movie.releaseDate || "Not available"}
+            <strong>Release date:</strong>{" "}
+            {movie.releaseDate || "Not available"}
           </p>
           <p>
             <strong>Rating:</strong>{" "}
@@ -110,7 +114,8 @@ function MovieDetailPage() {
               : "Not available"}
           </p>
           <p>
-            <strong>Genres:</strong> {movie.genres?.join(", ") || "Not available"}
+            <strong>Genres:</strong>{" "}
+            {movie.genres?.join(", ") || "Not available"}
           </p>
 
           <div style={{ marginTop: "16px" }}>
