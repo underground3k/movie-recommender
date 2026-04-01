@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/movies")
-@CrossOrigin(origins = "*") // MVP: open CORS; restrict later to React URL
+@CrossOrigin(origins = "*")
 public class MovieController {
 
     private final MovieService movieService;
@@ -19,9 +19,13 @@ public class MovieController {
     }
 
     // GET /movies?page=0&size=20
+    // GET /movies?page=0&size=20&search=inception
     @GetMapping
-    public Page<MovieSummaryDto> getMovies(@PageableDefault(size = 20) Pageable pageable) {
-        return movieService.getMovies(pageable);
+    public Page<MovieSummaryDto> getMovies(
+            @PageableDefault(size = 20) Pageable pageable,
+            @RequestParam(required = false) String search
+    ) {
+        return movieService.getMovies(pageable, search);
     }
 
     // GET /movies/{id}

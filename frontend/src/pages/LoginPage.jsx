@@ -1,21 +1,52 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "./components/AuthLayout";
+import { loginUser } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 
 function LoginPage() {
   const [focused, setFocused] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const data = await loginUser({ email, password });
+      const payload = JSON.parse(atob(data.token.split(".")[1]));
+      login({
+        userId: payload.userId,
+        username: payload.username,
+        token: data.token,
+      });
+      navigate("/");
+    } catch (err) {
+      setError(err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to track your ratings and get recommendations.">
-      <form
-        style={styles.form}
-        onSubmit={(e) => e.preventDefault()}
-      >
+      <form style={styles.form} onSubmit={handleSubmit}>
+        {error && <p style={styles.errorMsg}>{error}</p>}
+
         <Field
           id="email"
           label="Email"
           type="email"
           placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           focused={focused === "email"}
           onFocus={() => setFocused("email")}
           onBlur={() => setFocused(null)}
@@ -25,14 +56,15 @@ function LoginPage() {
           label="Password"
           type="password"
           placeholder="••••••••"
-          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           focused={focused === "password"}
           onFocus={() => setFocused("password")}
           onBlur={() => setFocused(null)}
         />
 
-        <button type="submit" style={styles.submitBtn}>
-          Log in
+        <button type="submit" style={styles.submitBtn} disabled={loading}>
+          {loading ? "Logging in…" : "Log in"}
         </button>
 
         <p style={styles.switchText}>
@@ -44,7 +76,7 @@ function LoginPage() {
   );
 }
 
-function Field({ id, label, type, placeholder, minLength, focused, onFocus, onBlur }) {
+function Field({ id, label, type, placeholder, value, onChange, focused, onFocus, onBlur }) {
   return (
     <div style={styles.fieldWrap}>
       <label htmlFor={id} style={styles.label}>{label}</label>
@@ -52,8 +84,9 @@ function Field({ id, label, type, placeholder, minLength, focused, onFocus, onBl
         id={id}
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={onChange}
         required
-        minLength={minLength}
         onFocus={onFocus}
         onBlur={onBlur}
         style={{
@@ -71,6 +104,14 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "16px",
+  },
+  errorMsg: {
+    fontSize: "13px",
+    color: "#e85555",
+    background: "rgba(232,85,85,0.08)",
+    border: "1px solid rgba(232,85,85,0.2)",
+    borderRadius: "7px",
+    padding: "10px 12px",
   },
   fieldWrap: {
     display: "flex",

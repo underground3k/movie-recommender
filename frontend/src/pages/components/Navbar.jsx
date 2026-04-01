@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const BASE_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:8080"
@@ -8,6 +9,7 @@ const BASE_URL = (
 function Navbar({ onSearch }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -17,7 +19,6 @@ function Navbar({ onSearch }) {
 
   const isHome = location.pathname === "/";
 
-  // close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -44,7 +45,6 @@ function Navbar({ onSearch }) {
       return;
     }
 
-    // live dropdown search for non-home pages
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
@@ -77,6 +77,11 @@ function Navbar({ onSearch }) {
     setDropdownOpen(false);
     setSearchValue("");
     navigate(`/movies/${id}`);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   return (
@@ -113,7 +118,6 @@ function Navbar({ onSearch }) {
             {searching && <span style={styles.searchSpinner}>⟳</span>}
           </form>
 
-          {/* Dropdown results (shown when not on home page) */}
           {dropdownOpen && searchResults.length > 0 && !isHome && (
             <div style={styles.dropdown}>
               {searchResults.map((movie) => (
@@ -141,8 +145,17 @@ function Navbar({ onSearch }) {
 
         {/* Auth buttons */}
         <div style={styles.authBtns}>
-          <Link to="/login" style={styles.btnGhost}>Log in</Link>
-          <Link to="/register" style={styles.btnAccent}>Sign up</Link>
+          {user ? (
+            <>
+              <span style={styles.welcomeText}>Hi, {user.username}</span>
+              <button onClick={handleLogout} style={styles.btnGhost}>Log out</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" style={styles.btnGhost}>Log in</Link>
+              <Link to="/register" style={styles.btnAccent}>Sign up</Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
@@ -317,6 +330,11 @@ const styles = {
     marginLeft: "auto",
     flexShrink: 0,
   },
+  welcomeText: {
+    fontSize: "13px",
+    color: "var(--text-secondary)",
+    fontWeight: 500,
+  },
   btnGhost: {
     fontSize: "13px",
     fontWeight: 500,
@@ -327,6 +345,7 @@ const styles = {
     background: "transparent",
     transition: "border-color 0.15s, color 0.15s",
     textDecoration: "none",
+    cursor: "pointer",
   },
   btnAccent: {
     fontSize: "13px",
