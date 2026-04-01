@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Star({ filled, onClick, onHover, onLeave }) {
+function Star({ filled, half, onClick, onHover, onLeave, size = 24 }) {
   return (
     <button
       type="button"
@@ -13,9 +13,12 @@ function Star({ filled, onClick, onHover, onLeave }) {
         border: "none",
         padding: 0,
         cursor: "pointer",
-        fontSize: "22px",
-        color: filled ? "#fbbf24" : "#4b5563",
-        transition: "transform 80ms ease-out, color 80ms ease-out",
+        fontSize: `${size}px`,
+        color: filled ? "var(--accent)" : "var(--text-muted)",
+        transition: "transform 0.1s ease, color 0.1s ease",
+        lineHeight: 1,
+        display: "flex",
+        alignItems: "center",
       }}
     >
       {filled ? "★" : "☆"}
@@ -23,20 +26,20 @@ function Star({ filled, onClick, onHover, onLeave }) {
   );
 }
 
-function StarRating({ max = 5, value, onChange }) {
+function StarRating({ max = 5, value, onChange, size = 22 }) {
   const [hovered, setHovered] = useState(null);
   const displayValue = hovered ?? value;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      <div style={{ display: "flex", gap: "2px" }}>
+    <div style={styles.wrap}>
+      <div style={styles.stars}>
         {Array.from({ length: max }, (_, i) => {
           const starValue = i + 1;
-          const filled = starValue <= displayValue;
           return (
             <Star
               key={starValue}
-              filled={filled}
+              size={size}
+              filled={starValue <= displayValue}
               onClick={() => onChange?.(starValue)}
               onHover={() => setHovered(starValue)}
               onLeave={() => setHovered(null)}
@@ -44,18 +47,29 @@ function StarRating({ max = 5, value, onChange }) {
           );
         })}
       </div>
-      {displayValue ? (
-        <span style={{ fontSize: "13px", color: "#6b7280" }}>
-          Your rating: <strong>{displayValue}</strong> / {max}
-        </span>
-      ) : (
-        <span style={{ fontSize: "13px", color: "#6b7280" }}>
-          Tap a star to rate
-        </span>
-      )}
+      <span style={styles.label}>
+        {displayValue
+          ? `${displayValue} / ${max}`
+          : "Tap to rate"}
+      </span>
     </div>
   );
 }
 
-export default StarRating;
+const styles = {
+  wrap: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+  stars: {
+    display: "flex",
+    gap: "2px",
+  },
+  label: {
+    fontSize: "13px",
+    color: "var(--text-muted)",
+  },
+};
 
+export default StarRating;
