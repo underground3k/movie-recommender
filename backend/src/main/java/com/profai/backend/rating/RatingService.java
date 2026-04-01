@@ -28,19 +28,19 @@ public class RatingService {
         this.movieRepository = movieRepository;
     }
 
-    public RatingResponse rateMovie(RateMovieRequest request) {
+    public RatingResponse rateMovie(Long userId, RateMovieRequest request) {
 
         if (request.stars() == null || request.stars() < 1 || request.stars() > 5) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stars must be between 1 and 5");
         }
 
-        User user = userRepository.findById(request.userId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         Movie movie = movieRepository.findById(request.movieId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie not found"));
 
-        Rating rating = ratingRepository.findByUserIdAndMovieId(request.userId(), request.movieId())
+        Rating rating = ratingRepository.findByUserIdAndMovieId(userId, request.movieId())
                 .orElseGet(() -> new Rating(user, movie, request.stars()));
 
         rating.setStars(request.stars());
@@ -58,7 +58,6 @@ public class RatingService {
     }
 
     public List<UserRatingDto> getRatingsByUserId(Long userId) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
