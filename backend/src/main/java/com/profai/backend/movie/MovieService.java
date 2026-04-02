@@ -19,14 +19,21 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    public Page<MovieSummaryDto> getMovies(Pageable pageable) {
-        return movieRepository.findAll(pageable)
-                .map(m -> new MovieSummaryDto(
-                        m.getId(),
-                        m.getTitle(),
-                        m.getGenres().stream().map(Genre::getName).sorted().toList(),
-                        m.getPosterUrl()
-                ));
+    public Page<MovieSummaryDto> getMovies(Pageable pageable, String search) {
+        Page<Movie> movies;
+
+        if (search != null && !search.isBlank()) {
+            movies = movieRepository.findByTitleContainingIgnoreCase(search.trim(), pageable);
+        } else {
+            movies = movieRepository.findAll(pageable);
+        }
+
+        return movies.map(m -> new MovieSummaryDto(
+                m.getId(),
+                m.getTitle(),
+                m.getGenres().stream().map(Genre::getName).sorted().toList(),
+                m.getPosterUrl()
+        ));
     }
 
     public MovieDetailDto getMovieById(Long id) {
