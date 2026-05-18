@@ -28,8 +28,9 @@ public class JwtAuthenticationFilter implements Filter {
 
         boolean protectsPostRatings = "/ratings".equals(path) && "POST".equalsIgnoreCase(method);
         boolean protectsGetRatings = path.startsWith("/ratings/") && "GET".equalsIgnoreCase(method);
+        boolean protectsGetRecommendations = "/recommendations".equals(path) && "GET".equalsIgnoreCase(method);
 
-        if (protectsPostRatings || protectsGetRatings) {
+        if (protectsPostRatings || protectsGetRatings || protectsGetRecommendations) {
             String authHeader = httpRequest.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
