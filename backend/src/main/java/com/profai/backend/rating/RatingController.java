@@ -36,7 +36,20 @@ public class RatingController {
     }
 
     @GetMapping("/{userId}")
-    public List<UserRatingDto> getRatingsByUserId(@PathVariable Long userId) {
-        return ratingService.getRatingsByUserId(userId);
+    public List<UserRatingDto> getRatingsByUserId(
+            @PathVariable Long userId,
+            HttpServletRequest httpRequest
+    ) {
+        Long authenticatedUserId = (Long) httpRequest.getAttribute("userId");
+
+        if (authenticatedUserId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid token");
+        }
+
+        if (!authenticatedUserId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot access another user's ratings");
+        }
+
+        return ratingService.getRatingsByUserId(authenticatedUserId);
     }
 }
