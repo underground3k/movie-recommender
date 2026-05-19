@@ -19,5 +19,5 @@ tmdb:
   image-url: ${TMDB_IMAGE_URL:https://image.tmdb.org/t/p/w500}
 
 jwt:
-  secret: ${JWT_SECRET:my-super-secret-key-my-super-secret-key}
+  secret: ${JWT_SECRET}
   expiration-ms: 86400000
