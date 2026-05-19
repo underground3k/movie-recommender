@@ -15,6 +15,7 @@ public class FilterConfig {
         registration.setFilter(filter);
         registration.addUrlPatterns("/ratings");
         registration.addUrlPatterns("/ratings/*");
+        registration.addUrlPatterns("/recommendations");
         registration.setOrder(1);
         return registration;
     }
