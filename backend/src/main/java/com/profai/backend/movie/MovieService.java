@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class MovieService {
@@ -49,6 +50,18 @@ public class MovieService {
 
         ensurePoster(m);
 
+        return toDetailDto(m);
+    }
+
+    // Top-rated movies for the logged-out "Popular movies" row.
+    @Transactional(readOnly = true)
+    public List<MovieDetailDto> getPopularMovies() {
+        return movieRepository.findTop12ByVoteAverageIsNotNullOrderByVoteAverageDesc().stream()
+                .map(this::toDetailDto)
+                .toList();
+    }
+
+    private MovieDetailDto toDetailDto(Movie m) {
         return new MovieDetailDto(
                 m.getId(),
                 m.getTitle(),

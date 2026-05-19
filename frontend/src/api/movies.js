@@ -18,6 +18,11 @@ export const getMovieById = async (id) => {
   return fetchJson(`/movies/${id}`);
 };
 
+// Top-rated movies, shown to logged-out users on the homepage.
+export const getPopularMovies = async () => {
+  return fetchJson(`/movies/popular`);
+};
+
 // Search uses the same /movies endpoint with a title filter.
 // If your backend doesn't support ?search= yet, this falls back to getMovies.
 export const searchMovies = async (query, page = 0) => {
