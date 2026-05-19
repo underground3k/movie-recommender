@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getMovieById } from "../api/movies";
-import { rateMovie, ApiError } from "../api/ratings";
+import { rateMovie, getUserRatings, ApiError } from "../api/ratings";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "./components/Navbar";
 import StarRating from "./components/StarRating";
@@ -33,6 +33,35 @@ function MovieDetailPage() {
     loadMovie();
     return () => { cancelled = true; };
   }, [id]);
+
+  // Prefill the user's existing rating for this movie, if there is one.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    const loadExistingRating = async () => {
+      try {
+        const ratings = await getUserRatings({
+          userId: user.userId,
+          token: user.token,
+        });
+        if (cancelled) return;
+        const existing = ratings.find((r) => String(r.movieId) === String(id));
+        if (existing) setUserRating(existing.stars);
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 401) {
+          logout();
+          navigate("/login", { state: { from: location.pathname } });
+          return;
+        }
+        // Non-critical: leave the stars empty if it can't be loaded.
+        console.error(e);
+      }
+    };
+
+    loadExistingRating();
+    return () => { cancelled = true; };
+  }, [user, id, logout, navigate, location.pathname]);
 
   const handleBack = () => {
     if (location.state?.from) {
@@ -173,7 +202,9 @@ function MovieDetailPage() {
 
                 {/* User rating */}
                 <div style={styles.ratingSection}>
-                  <p style={styles.ratingLabel}>Your rating</p>
+                  <p style={styles.ratingLabel}>
+                    {userRating ? "Your rating" : "Rate this film"}
+                  </p>
                   <StarRating
                     value={userRating}
                     onChange={handleRate}

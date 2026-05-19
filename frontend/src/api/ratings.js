@@ -12,6 +12,20 @@ export class ApiError extends Error {
   }
 }
 
+// GET /ratings/{userId} — every rating the user has made (JWT-protected).
+export const getUserRatings = async ({ userId, token }) => {
+  const res = await fetch(`${BASE_URL}/ratings/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(body || `Request failed with status ${res.status}`, res.status);
+  }
+
+  return res.json(); // [{ ratingId, movieId, movieTitle, stars }]
+};
+
 // POST /ratings — creates a rating, or updates it if one already exists
 // for this user/movie (the backend upserts on user_id + movie_id).
 export const rateMovie = async ({ movieId, stars, token }) => {
