@@ -13,7 +13,7 @@ function MovieDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [movie, setMovie] = useState(null);
   const [error, setError] = useState("");
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -43,6 +43,11 @@ function MovieDetailPage() {
         const res = await fetch(`${BASE_URL}/ratings/${user.userId}`, {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        if (res.status === 401) {
+          logout();
+          navigate("/login");
+          return;
+        }
         if (!res.ok) return;
         const ratings = await res.json();
         const existing = ratings.find((r) => r.movieId === Number(id));
@@ -52,14 +57,15 @@ function MovieDetailPage() {
       }
     };
     loadRating();
-  }, [id, user]);
+  }, [id, user, logout, navigate]);
 
   const handleRate = async (stars) => {
     if (!user) {
       navigate("/login");
       return;
     }
-    setUserRating(stars);
+    const previous = userRating;
+    setUserRating(stars); // optimistic
     setRatingError("");
     try {
       const res = await fetch(`${BASE_URL}/ratings`, {
@@ -71,11 +77,14 @@ function MovieDetailPage() {
         body: JSON.stringify({ movieId: Number(id), stars }),
       });
       if (res.status === 401) {
+        setUserRating(previous);
+        logout();
         navigate("/login");
         return;
       }
       if (!res.ok) throw new Error("Failed to save rating");
     } catch {
+      setUserRating(previous);
       setRatingError("Could not save your rating. Please try again.");
     }
   };
