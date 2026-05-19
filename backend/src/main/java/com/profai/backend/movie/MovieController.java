@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/movies")
 public class MovieController {
@@ -25,6 +27,13 @@ public class MovieController {
             @RequestParam(required = false) String search
     ) {
         return movieService.getMovies(pageable, search);
+    }
+
+    // GET /movies/popular — top movies by vote average (public, for the
+    // logged-out "Popular movies" row)
+    @GetMapping("/popular")
+    public List<MovieDetailDto> getPopular() {
+        return movieService.getPopularMovies();
     }
 
     // GET /movies/{id}
