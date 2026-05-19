@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ratings")
-@CrossOrigin(origins = "*")
 public class RatingController {
 
     private final RatingService ratingService;

@@ -24,7 +24,9 @@ function MyRatingsPage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${BASE_URL}/ratings/${user.userId}`);
+        const res = await fetch(`${BASE_URL}/ratings/${user.userId}`, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
         if (!res.ok) throw new Error("Failed to load ratings");
         const data = await res.json();
         setRatings(data);
