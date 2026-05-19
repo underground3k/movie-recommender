@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getMovieById } from "../api/movies";
+import { rateMovie, ApiError } from "../api/ratings";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "./components/Navbar";
 import StarRating from "./components/StarRating";
 
@@ -8,10 +10,13 @@ function MovieDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [movie, setMovie] = useState(null);
   const [error, setError] = useState("");
   const [imgLoaded, setImgLoaded] = useState(false);
   const [userRating, setUserRating] = useState(0);
+  const [savingRating, setSavingRating] = useState(false);
+  const [ratingError, setRatingError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +39,35 @@ function MovieDetailPage() {
       navigate(location.state.from, { replace: true });
     } else {
       navigate(-1);
+    }
+  };
+
+  const handleRate = async (stars) => {
+    if (!user) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+
+    const previous = userRating;
+    setUserRating(stars); // optimistic update
+    setSavingRating(true);
+    setRatingError("");
+
+    try {
+      await rateMovie({ movieId: movie.id, stars, token: user.token });
+    } catch (e) {
+      setUserRating(previous);
+
+      if (e instanceof ApiError && e.status === 401) {
+        logout();
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
+
+      console.error(e);
+      setRatingError("Couldn't save your rating. Please try again.");
+    } finally {
+      setSavingRating(false);
     }
   };
 
@@ -140,7 +174,17 @@ function MovieDetailPage() {
                 {/* User rating */}
                 <div style={styles.ratingSection}>
                   <p style={styles.ratingLabel}>Your rating</p>
-                  <StarRating value={userRating} onChange={setUserRating} />
+                  <StarRating
+                    value={userRating}
+                    onChange={handleRate}
+                    disabled={savingRating}
+                  />
+                  {savingRating && (
+                    <span style={styles.ratingHint}>Saving…</span>
+                  )}
+                  {ratingError && (
+                    <span style={styles.ratingErrorMsg}>{ratingError}</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -355,6 +399,14 @@ const styles = {
     letterSpacing: "0.06em",
     textTransform: "uppercase",
     color: "var(--text-muted)",
+  },
+  ratingHint: {
+    fontSize: "12px",
+    color: "var(--text-muted)",
+  },
+  ratingErrorMsg: {
+    fontSize: "12px",
+    color: "#e85555",
   },
 };
 

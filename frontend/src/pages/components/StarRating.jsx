@@ -1,18 +1,19 @@
 import { useState } from "react";
 
-function Star({ filled, half, onClick, onHover, onLeave, size = 24 }) {
+function Star({ filled, onClick, onHover, onLeave, size = 24, disabled }) {
   return (
     <button
       type="button"
       onClick={onClick}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
+      disabled={disabled}
       aria-label={filled ? "Filled star" : "Empty star"}
       style={{
         background: "transparent",
         border: "none",
         padding: 0,
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
         fontSize: `${size}px`,
         color: filled ? "var(--accent)" : "var(--text-muted)",
         transition: "transform 0.1s ease, color 0.1s ease",
@@ -26,12 +27,12 @@ function Star({ filled, half, onClick, onHover, onLeave, size = 24 }) {
   );
 }
 
-function StarRating({ max = 5, value, onChange, size = 22 }) {
+function StarRating({ max = 5, value, onChange, size = 22, disabled = false }) {
   const [hovered, setHovered] = useState(null);
-  const displayValue = hovered ?? value;
+  const displayValue = (disabled ? null : hovered) ?? value;
 
   return (
-    <div style={styles.wrap}>
+    <div style={{ ...styles.wrap, opacity: disabled ? 0.6 : 1 }}>
       <div style={styles.stars}>
         {Array.from({ length: max }, (_, i) => {
           const starValue = i + 1;
@@ -39,6 +40,7 @@ function StarRating({ max = 5, value, onChange, size = 22 }) {
             <Star
               key={starValue}
               size={size}
+              disabled={disabled}
               filled={starValue <= displayValue}
               onClick={() => onChange?.(starValue)}
               onHover={() => setHovered(starValue)}
