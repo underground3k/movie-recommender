@@ -23,11 +23,14 @@ public class JwtAuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // Only protect POST /ratings
         String path = httpRequest.getRequestURI();
         String method = httpRequest.getMethod();
 
-        if ("/ratings".equals(path) && "POST".equalsIgnoreCase(method)) {
+        boolean protectsPostRatings = "/ratings".equals(path) && "POST".equalsIgnoreCase(method);
+        boolean protectsGetRatings = path.startsWith("/ratings/") && "GET".equalsIgnoreCase(method);
+        boolean protectsGetRecommendations = "/recommendations".equals(path) && "GET".equalsIgnoreCase(method);
+
+        if (protectsPostRatings || protectsGetRatings || protectsGetRecommendations) {
             String authHeader = httpRequest.getHeader("Authorization");
 
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {

@@ -14,6 +14,8 @@ public class FilterConfig {
         FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(filter);
         registration.addUrlPatterns("/ratings");
+        registration.addUrlPatterns("/ratings/*");
+        registration.addUrlPatterns("/recommendations");
         registration.setOrder(1);
         return registration;
     }

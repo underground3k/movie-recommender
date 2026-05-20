@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getMovies, searchMovies } from "../api/movies";
+import { getMovies, searchMovies, getPopularMovies } from "../api/movies";
+import { getRecommendations } from "../api/recommendations";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "./components/Navbar";
 
 function MovieCard({ movie, onClick }) {
@@ -52,12 +54,16 @@ function HomePage() {
   const [error, setError] = useState("");
   const [totalPages, setTotalPages] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [recos, setRecos] = useState([]);
+  const [recosLoading, setRecosLoading] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const rawPage = parseInt(searchParams.get("page") || "0", 10);
   const page = isNaN(rawPage) || rawPage < 0 ? 0 : rawPage;
   const urlSearch = searchParams.get("search") || "";
+  const isSearching = searchQuery.trim().length > 0;
 
   // sync search input from URL (e.g. when navigating from navbar)
   useEffect(() => {
@@ -87,6 +93,32 @@ function HomePage() {
     load();
   }, [load]);
 
+  // "Recommended for you" (logged in) / "Popular movies" (logged out).
+  // Hidden while searching so it doesn't compete with the results.
+  useEffect(() => {
+    if (isSearching) {
+      setRecos([]);
+      return;
+    }
+    let cancelled = false;
+    const loadRecos = async () => {
+      setRecosLoading(true);
+      try {
+        const data = user
+          ? await getRecommendations(user.token)
+          : await getPopularMovies();
+        if (!cancelled) setRecos(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) setRecos([]); // best-effort: just hide the row
+      } finally {
+        if (!cancelled) setRecosLoading(false);
+      }
+    };
+    loadRecos();
+    return () => { cancelled = true; };
+  }, [user, isSearching]);
+
   const handleSearch = (val) => {
     setSearchQuery(val);
     setSearchParams({ search: val, page: "0" });
@@ -105,6 +137,33 @@ function HomePage() {
       <Navbar onSearch={handleSearch} searchValue={searchQuery} />
 
       <main style={styles.main}>
+        {/* Recommended / Popular row */}
+        {!isSearching && (recosLoading || recos.length > 0) && (
+          <section style={styles.recoSection}>
+            <h2 style={styles.recoTitle}>
+              {user ? "Recommended for you" : "Popular movies"}
+            </h2>
+            <div style={styles.recoStrip}>
+              {recosLoading
+                ? Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} style={styles.recoSkeleton} />
+                  ))
+                : recos.map((movie) => (
+                    <div key={movie.id} style={styles.recoCard}>
+                      <MovieCard
+                        movie={movie}
+                        onClick={() =>
+                          navigate(`/movies/${movie.id}`, {
+                            state: { from: "/" },
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+            </div>
+          </section>
+        )}
+
         {/* Header */}
         <div style={styles.pageHeader}>
           <h1 style={styles.pageTitle}>
@@ -252,6 +311,36 @@ const styles = {
   pageSub: {
     fontSize: "13px",
     color: "var(--text-muted)",
+  },
+  recoSection: {
+    marginBottom: "44px",
+  },
+  recoTitle: {
+    fontFamily: "'DM Serif Display', serif",
+    fontSize: "22px",
+    fontWeight: 400,
+    letterSpacing: "-0.01em",
+    color: "var(--text-primary)",
+    marginBottom: "18px",
+  },
+  recoStrip: {
+    display: "flex",
+    gap: "16px",
+    overflowX: "auto",
+    paddingBottom: "6px",
+  },
+  recoCard: {
+    width: "150px",
+    flexShrink: 0,
+  },
+  recoSkeleton: {
+    width: "150px",
+    flexShrink: 0,
+    aspectRatio: "2/3",
+    borderRadius: "var(--radius)",
+    background: "linear-gradient(110deg, var(--surface) 30%, var(--surface-2) 50%, var(--surface) 70%)",
+    backgroundSize: "200% 100%",
+    animation: "shimmer 1.4s infinite",
   },
   grid: {
     display: "grid",

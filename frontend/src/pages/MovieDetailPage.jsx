@@ -1,17 +1,24 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getMovieById } from "../api/movies";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "./components/Navbar";
 import StarRating from "./components/StarRating";
+
+const BASE_URL = (
+  import.meta.env.VITE_API_URL || "http://localhost:8080"
+).replace(/\/$/, "");
 
 function MovieDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [movie, setMovie] = useState(null);
   const [error, setError] = useState("");
   const [imgLoaded, setImgLoaded] = useState(false);
   const [userRating, setUserRating] = useState(0);
+  const [ratingError, setRatingError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -28,6 +35,59 @@ function MovieDetailPage() {
     loadMovie();
     return () => { cancelled = true; };
   }, [id]);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadRating = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/ratings/${user.userId}`, {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        if (res.status === 401) {
+          logout();
+          navigate("/login");
+          return;
+        }
+        if (!res.ok) return;
+        const ratings = await res.json();
+        const existing = ratings.find((r) => r.movieId === Number(id));
+        if (existing) setUserRating(existing.stars);
+      } catch {
+        // silently ignore — rating prefill is best-effort
+      }
+    };
+    loadRating();
+  }, [id, user, logout, navigate]);
+
+  const handleRate = async (stars) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    const previous = userRating;
+    setUserRating(stars); // optimistic
+    setRatingError("");
+    try {
+      const res = await fetch(`${BASE_URL}/ratings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ movieId: Number(id), stars }),
+      });
+      if (res.status === 401) {
+        setUserRating(previous);
+        logout();
+        navigate("/login");
+        return;
+      }
+      if (!res.ok) throw new Error("Failed to save rating");
+    } catch {
+      setUserRating(previous);
+      setRatingError("Could not save your rating. Please try again.");
+    }
+  };
 
   const handleBack = () => {
     if (location.state?.from) {
@@ -139,8 +199,9 @@ function MovieDetailPage() {
 
                 {/* User rating */}
                 <div style={styles.ratingSection}>
-                  <p style={styles.ratingLabel}>Your rating</p>
-                  <StarRating value={userRating} onChange={setUserRating} />
+                  <p style={styles.ratingLabel}>{userRating ? "Your rating" : "Rate this film"}</p>
+                  <StarRating value={userRating} onChange={handleRate} />
+                  {ratingError && <p style={styles.ratingError}>{ratingError}</p>}
                 </div>
               </div>
             </div>
@@ -355,6 +416,11 @@ const styles = {
     letterSpacing: "0.06em",
     textTransform: "uppercase",
     color: "var(--text-muted)",
+  },
+  ratingError: {
+    fontSize: "12px",
+    color: "#e85555",
+    marginTop: "4px",
   },
 };
 
