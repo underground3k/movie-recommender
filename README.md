@@ -1,4 +1,4 @@
-# Movie Recommender
+<img width="2551" height="1278" alt="image" src="https://github.com/user-attachments/assets/2279c3ba-a635-49d5-8223-4922f811c4e9" /># Movie Recommender
 
 A full-stack movie recommendation system built as a 4-person student project using Agile Scrum methodology. Users can browse nearly 10,000 movies, rate them, and receive personalized recommendations based on their taste.
 
@@ -54,9 +54,7 @@ graph LR
 
 *Add screenshots here once captured:*
 
-- `docs/screenshots/homepage.png` — Discover films + recommendations
-- `docs/screenshots/movie-detail.png` — Movie detail with star rating
-- `docs/screenshots/my-ratings.png` — User's rating history
+-<img width="2551" height="1278" alt="image" src="https://github.com/user-attachments/assets/cd1aa715-63ae-4e3c-bd8b-b5eed463f9a0" />
 
 ---
 
